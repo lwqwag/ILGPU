@@ -159,7 +159,7 @@ namespace ILGPU.Frontend.Intrinsic
             var location = context.Location;
 
             // Build a new assertion
-            if (context.Context.HasFlags(ContextFlags.EnableAssertions))
+            if (context.Properties.EnableAssertions)
             {
                 // Determine base offset and max length
                 var baseOffset = builder.CreatePrimitiveValue(

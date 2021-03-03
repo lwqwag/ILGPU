@@ -403,7 +403,7 @@ namespace ILGPU.Frontend
             bool isInitOnly = (field.Attributes & FieldAttributes.InitOnly) !=
                 FieldAttributes.InitOnly;
             if (isInitOnly &&
-                !Context.HasFlags(ContextFlags.InlineMutableStaticFieldValues))
+                Context.Properties.StaticFieldMode < StaticFieldMode.MutableStaticFields)
             {
                 throw Location.GetNotSupportedException(
                     ErrorMessages.NotSupportedLoadOfStaticField,
@@ -420,7 +420,7 @@ namespace ILGPU.Frontend
         {
             Debug.Assert(field != null || !field.IsStatic, "Invalid field");
 
-            if (!Context.HasFlags(ContextFlags.IgnoreStaticFieldStores))
+            if (Context.Properties.StaticFieldMode < StaticFieldMode.Aggressive)
             {
                 throw Location.GetNotSupportedException(
                     ErrorMessages.NotSupportedStoreToStaticField,
