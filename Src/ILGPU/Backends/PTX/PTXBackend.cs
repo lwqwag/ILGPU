@@ -103,11 +103,11 @@ namespace ILGPU.Backends.PTX
                     transformerBuilder.AddBackendOptimizations(
                         new PTXAcceleratorSpecializer(
                             PointerType,
-                            Context.HasFlags(ContextFlags.EnableAssertions)),
-                        context.Flags,
-                        context.OptimizationLevel);
+                            Context.Properties.EnableAssertions),
+                        context.Properties.InliningMode,
+                        context.Properties.OptimizationLevel);
 
-                    if (Context.HasFlags(ContextFlags.EnhancedPTXBackendFeatures))
+                    if (Context.Properties.GetPTXBackendMode() == PTXBackendMode.Enhanced)
                     {
                         // Create an optimized PTX assembler block schedule
                         transformerBuilder.Add(new PTXBlockScheduling());
@@ -161,13 +161,13 @@ namespace ILGPU.Backends.PTX
             // Ensure that all intrinsics can be generated
             backendContext.EnsureIntrinsicImplementations(IntrinsicProvider);
 
-            bool useDebugInfo = Context.HasFlags(
-                ContextFlags.EnableKernelDebugInformation);
+            var debugSymbolsMode = Context.Properties.DebugSymbolsMode;
+            bool useDebugInfo = debugSymbolsMode > DebugSymbolsMode.Kernel;
             PTXDebugInfoGenerator debugInfoGenerator = PTXNoDebugInfoGenerator.Empty;
             if (useDebugInfo)
             {
                 debugInfoGenerator =
-                    Context.HasFlags(ContextFlags.EnableInlineSourceAnnotations)
+                    debugSymbolsMode > DebugSymbolsMode.KernelSourceAnnotations
                     ? new PTXDebugSourceLineInfoGenerator()
                     : new PTXDebugLineInfoGenerator();
             }
@@ -193,7 +193,7 @@ namespace ILGPU.Backends.PTX
             builder.AppendLine();
 
             // Creates pointer alignment information in the context of O1 or higher
-            var alignments = Context.OptimizationLevel >= OptimizationLevel.O1
+            var alignments = Context.Properties.OptimizationLevel >= OptimizationLevel.O1
                 ? PointerAlignments.Apply(
                     backendContext.KernelMethod,
                     DefaultGlobalMemoryAlignment)
@@ -202,7 +202,7 @@ namespace ILGPU.Backends.PTX
             data = new PTXCodeGenerator.GeneratorArgs(
                 this,
                 entryPoint,
-                Context.Flags,
+                Context.Properties,
                 debugInfoGenerator,
                 alignments);
 

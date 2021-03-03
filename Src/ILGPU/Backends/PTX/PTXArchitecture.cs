@@ -285,19 +285,34 @@ namespace ILGPU.Backends
         #region Static
 
         /// <summary>
+        /// Tries to get the PTX architecture for the given major and minor versions.
+        /// </summary>
+        /// <param name="major">The major version.</param>
+        /// <param name="minor">The minor version.</param>
+        /// <param name="architecture">The determined architecture (if any).</param>
+        /// <returns>True, if the architecture is supported.</returns>
+        public static bool TryGetArchitecture(
+            int major,
+            int minor,
+            out PTXArchitecture architecture)
+        {
+            architecture = new PTXArchitecture(major, minor);
+            return
+                architecture >= PTXArchitecture.SM_30 &&
+                architecture <= PTXArchitecture.SM_86;
+        }
+
+        /// <summary>
         /// Resolves the PTX architecture for the given major and minor versions.
         /// </summary>
         /// <param name="major">The major version.</param>
         /// <param name="minor">The minor version.</param>
         /// <returns>The resolved PTX version.</returns>
-        public static PTXArchitecture GetArchitecture(int major, int minor)
-        {
-            var architecture = new PTXArchitecture(major, minor);
-            return architecture >= PTXArchitecture.SM_30
-            ? architecture
+        public static PTXArchitecture GetArchitecture(int major, int minor) =>
+            TryGetArchitecture(major, minor, out var arch)
+            ? arch
             : throw new NotSupportedException(
                 RuntimeErrorMessages.NotSupportedPTXArchitecture);
-        }
 
         #endregion
     }

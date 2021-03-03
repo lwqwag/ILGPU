@@ -70,13 +70,13 @@ namespace ILGPU.Backends.PTX
             internal GeneratorArgs(
                 PTXBackend backend,
                 EntryPoint entryPoint,
-                ContextFlags contextFlags,
+                ContextProperties contextProperties,
                 PTXDebugInfoGenerator debugInfoGenerator,
                 PointerAlignments.AlignmentInfo pointerAlignments)
             {
                 Backend = backend;
                 EntryPoint = entryPoint;
-                ContextFlags = contextFlags;
+                Properties = contextProperties;
                 DebugInfoGenerator = debugInfoGenerator;
                 PointerAlignments = pointerAlignments;
             }
@@ -92,9 +92,9 @@ namespace ILGPU.Backends.PTX
             public EntryPoint EntryPoint { get; }
 
             /// <summary>
-            /// Returns the current context flags.
+            /// Returns the current context properties.
             /// </summary>
-            public ContextFlags ContextFlags { get; }
+            public ContextProperties Properties { get; }
 
             /// <summary>
             /// Returns the debug-information code generator.
@@ -331,8 +331,8 @@ namespace ILGPU.Backends.PTX
             Allocas = allocas;
 
             Architecture = args.Backend.Architecture;
-            FastMath = args.ContextFlags.HasFlags(ContextFlags.FastMath);
-            EnableAssertions = args.ContextFlags.HasFlags(ContextFlags.EnableAssertions);
+            FastMath = args.Properties.MathMode >= MathMode.Fast;
+            EnableAssertions = args.Properties.EnableAssertions;
 
             labelPrefix = "L_" + Method.Id.ToString();
             ReturnParamName = "retval_" + Method.Id;
@@ -342,7 +342,7 @@ namespace ILGPU.Backends.PTX
 
             // Use the defined PTX backend block schedule to avoid unnecessary branches
             Schedule =
-                args.ContextFlags.HasFlags(ContextFlags.EnhancedPTXBackendFeatures)
+                args.Properties.GetPTXBackendMode() == PTXBackendMode.Enhanced
                 ? Method.Blocks.CreateOptimizedPTXSchedule()
                 : Method.Blocks.CreateDefaultPTXSchedule();
         }
