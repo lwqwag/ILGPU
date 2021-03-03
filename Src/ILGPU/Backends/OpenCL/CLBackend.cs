@@ -55,7 +55,7 @@ namespace ILGPU.Backends.OpenCL
         public CLBackend(
             Context context,
             CLCapabilityContext capabilities,
-            CLAcceleratorVendor vendor)
+            CLDeviceVendor vendor)
             : base(
                   context,
                   capabilities,
@@ -73,8 +73,8 @@ namespace ILGPU.Backends.OpenCL
                         TransformerConfiguration.Empty);
                     transformerBuilder.AddBackendOptimizations(
                         new CLAcceleratorSpecializer(PointerType),
-                        context.Flags,
-                        context.OptimizationLevel);
+                        context.Properties.InliningMode,
+                        context.Properties.OptimizationLevel);
                     builder.Add(transformerBuilder.ToTransformer());
                 });
 
@@ -96,7 +96,7 @@ namespace ILGPU.Backends.OpenCL
         /// <summary>
         /// Returns the associated major accelerator vendor.
         /// </summary>
-        public CLAcceleratorVendor Vendor { get; }
+        public CLDeviceVendor Vendor { get; }
 
         /// <summary>
         /// Returns the associated <see cref="Backend.ArgumentMapper"/>.
