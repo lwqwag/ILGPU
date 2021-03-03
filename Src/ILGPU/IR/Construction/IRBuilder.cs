@@ -33,8 +33,9 @@ namespace ILGPU.IR.Construction
         {
             BasicBlock = basicBlock;
             BaseContext = Method.BaseContext;
-            UseConstantPropagation = !BaseContext.HasFlags(
-                ContextFlags.DisableConstantPropagation);
+
+            // TODO: will be removed when the PR is rebased
+            UseConstantPropagation = true;
         }
 
         #endregion
